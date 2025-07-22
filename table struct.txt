@@ -1,0 +1,110 @@
+-- 1. USERS TABLE
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    mobile_no VARCHAR(20) NOT NULL,
+    status ENUM('pending', 'active', 'rejected') DEFAULT 'pending',
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. USER PERSONAL INFO
+CREATE TABLE user_personal_info (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    address TEXT,
+    father_name VARCHAR(100),
+    mother_name VARCHAR(100),
+    income_range VARCHAR(50),
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. USER BANK INFO
+CREATE TABLE user_bank_info (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    ifsc_code VARCHAR(20),
+    account_no VARCHAR(50),
+    bank_name VARCHAR(100),
+    branch VARCHAR(100),
+    bank_address TEXT,
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. SEGMENTS (e.g., NSC, BSC, MCX)
+CREATE TABLE segments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. SHARES MASTER
+CREATE TABLE shares (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    segment_id INT,
+    FOREIGN KEY (segment_id) REFERENCES segments(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. USER TRADES (BUY / SELL)
+CREATE TABLE user_trades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    share_id INT NOT NULL,
+    type ENUM('buy', 'sell') NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (share_id) REFERENCES shares(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 7. FUND TRANSACTIONS (ADD / WITHDRAW)
+CREATE TABLE fund_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type ENUM('add', 'withdraw') NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('success', 'failed') DEFAULT 'success',
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 8. TRANSACTION HISTORY (TRADE / FUND SUMMARY)
+CREATE TABLE transaction_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type ENUM('trade', 'fund') NOT NULL,
+    details TEXT,
+    created_by INT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_by INT,
+    updated_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 9. ADMINS
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password VARCHAR(255), -- should be hashed
+    role ENUM('admin', 'superadmin') DEFAULT 'admin'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
